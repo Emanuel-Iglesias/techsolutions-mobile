@@ -15,6 +15,10 @@ import ClientListScreen from './src/screens/clients/ClientListScreen'
 import ClientFormScreen from './src/screens/clients/ClientFormScreen'
 import UserListScreen from './src/screens/admin/UserListScreen'
 import UserFormScreen from './src/screens/admin/UserFormScreen'
+import AnalyticsScreen from './src/screens/admin/AnalyticsScreen'
+import ReportScreen from './src/screens/admin/ReportScreen'
+import SessionsScreen from './src/screens/admin/SessionsScreen'
+import ChangeLogScreen from './src/screens/admin/ChangeLogScreen'
 
 const Stack = createNativeStackNavigator()
 
@@ -44,6 +48,10 @@ function Navigation() {
           <Stack.Screen name="ClientForm" component={ClientFormScreen} />
           <Stack.Screen name="Users" component={UserListScreen} />
           <Stack.Screen name="UserForm" component={UserFormScreen} />
+          <Stack.Screen name="Analytics" component={AnalyticsScreen} />
+          <Stack.Screen name="Report" component={ReportScreen} />
+          <Stack.Screen name="Sessions" component={SessionsScreen} />
+          <Stack.Screen name="ChangeLog" component={ChangeLogScreen} />
         </>
       )}
     </Stack.Navigator>

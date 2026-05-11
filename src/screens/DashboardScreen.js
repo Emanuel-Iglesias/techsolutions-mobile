@@ -13,6 +13,10 @@ export default function DashboardScreen({ navigation }) {
     { label: 'Clientes', screen: 'Clients', color: '#3b82f6', icon: '👥' },
     { label: 'Proyectos', screen: 'Projects', color: '#22c55e', icon: '📁' },
     { label: 'Tareas', screen: 'Tasks', color: '#eab308', icon: '✅' },
+    { label: 'Analíticas', screen: 'Analytics', color: '#6366f1', icon: '📊' },
+    { label: 'Informe', screen: 'Report', color: '#dc2626', icon: '📑' },
+    { label: 'Sesiones', screen: 'Sessions', color: '#ef4444', icon: '🔐' },
+    { label: 'Historial', screen: 'ChangeLog', color: '#4b5563', icon: '📋' },
   ]
 
   const employeeCards = [

@@ -40,12 +40,26 @@ export default function ProjectListScreen({ navigation }) {
         <Text style={styles.cardSub}>Inicio: {new Date(item.startDate).toLocaleDateString()}</Text>
         </TouchableOpacity>
         {isAdmin && (
-        <View style={styles.actions}>
-            <TouchableOpacity style={styles.editBtn}
-            onPress={() => navigation.navigate('ProjectForm', { id: item.id })}>
-            <Text style={styles.editBtnText}>Editar</Text>
-            </TouchableOpacity>
-        </View>
+            <View style={styles.actions}>
+             <TouchableOpacity style={styles.editBtn}
+                onPress={() => navigation.navigate('ProjectForm', { id: item.id })}>
+                <Text style={styles.editBtnText}>Editar</Text>
+             </TouchableOpacity>
+             <TouchableOpacity style={styles.deleteBtn}
+                onPress={() => {
+                    Alert.alert('Confirmar', '¿Eliminar proyecto?', [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                        text: 'Eliminar', style: 'destructive', onPress: async () => {
+                        await api.delete(`/projects/${item.id}`)
+                        fetchProjects()
+                        }
+                    }
+                    ])
+                }}>
+                <Text style={styles.deleteBtnText}>Eliminar</Text>
+                </TouchableOpacity>
+            </View>
         )}
     </View>
     )
@@ -106,4 +120,6 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 8, marginTop: 12 },
   editBtn: { backgroundColor: '#fef3c7', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   editBtnText: { color: '#d97706', fontWeight: 'bold', fontSize: 13 },
+  deleteBtn: { backgroundColor: '#fee2e2', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  deleteBtnText: { color: '#dc2626', fontWeight: 'bold', fontSize: 13 },
 })
