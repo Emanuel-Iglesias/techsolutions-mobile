@@ -1,20 +1,24 @@
 import { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, RefreshControl } from 'react-native'
 import api from '../../api/axios'
 import { useAuth } from '../../context/AuthContext'
 
 export default function TaskListScreen({ navigation }) {
   const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(false)
   const { user } = useAuth()
   const isAdmin = user?.role === 'ADMIN'
   const isEmployee = user?.role === 'EMPLOYEE'
 
   const fetchTasks = async () => {
+    setLoading(true)
     try {
       const res = await api.get('/tasks')
       setTasks(res.data)
     } catch {
       Alert.alert('Error', 'No se pudieron cargar las tareas')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -93,6 +97,7 @@ export default function TaskListScreen({ navigation }) {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.empty}>No hay tareas</Text>}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchTasks} colors={['#2563eb']} />}
       />
     </View>
   )
@@ -101,13 +106,8 @@ export default function TaskListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3f4f6' },
   navbar: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    backgroundColor: '#2563eb', paddingHorizontal: 16, paddingTop: 50,
+    paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
   },
   navBack: { color: '#fff', fontSize: 14 },
   navTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },

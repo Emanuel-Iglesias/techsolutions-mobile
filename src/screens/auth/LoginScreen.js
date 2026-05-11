@@ -32,7 +32,7 @@ export default function LoginScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>TechSolutions</Text>
+        <Image source={require('../../../assets/logo_tech.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.subtitle}>Iniciar Sesión</Text>
 
         <TextInput
@@ -107,5 +107,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16
-  }
+  },
+  logo: { width: 180, height: 80, alignSelf: 'center', marginBottom: 8 },
 })

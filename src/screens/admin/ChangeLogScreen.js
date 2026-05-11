@@ -1,26 +1,49 @@
 import { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView, RefreshControl } from 'react-native'
 import api from '../../api/axios'
 
 export default function ChangeLogScreen({ navigation }) {
   const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(false)
   const [selected, setSelected] = useState(null)
+  const [filterEntity, setFilterEntity] = useState('')
+  const [filterAction, setFilterAction] = useState('')
 
-  useEffect(() => {
-    api.get('/changelog').then(res => setLogs(res.data))
-  }, [])
+  const fetchLogs = async () => {
+    setLoading(true)
+    try {
+      const res = await api.get('/changelog')
+      setLogs(res.data)
+    } catch {} finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchLogs() }, [])
 
   const actionColor = { CREATE: '#22c55e', UPDATE: '#eab308', DELETE: '#ef4444' }
   const entityLabel = { Client: 'Cliente', Project: 'Proyecto', Task: 'Tarea', User: 'Usuario' }
+
+  const filtered = logs.filter(l => {
+    if (filterEntity && l.entity !== filterEntity) return false
+    if (filterAction && l.action !== filterAction) return false
+    return true
+  })
+
+  const FilterBtn = ({ label, value, current, onPress, color }) => (
+    <TouchableOpacity
+      style={[styles.filterBtn, current === value && { backgroundColor: color || '#2563eb' }]}
+      onPress={() => onPress(current === value ? '' : value)}>
+      <Text style={[styles.filterBtnText, current === value && { color: '#fff' }]}>{label}</Text>
+    </TouchableOpacity>
+  )
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.user?.name}</Text>
         <View style={[styles.badge, { backgroundColor: actionColor[item.action] + '20' }]}>
-          <Text style={[styles.badgeText, { color: actionColor[item.action] }]}>
-            {item.action}
-          </Text>
+          <Text style={[styles.badgeText, { color: actionColor[item.action] }]}>{item.action}</Text>
         </View>
       </View>
       <Text style={styles.entity}>{entityLabel[item.entity] || item.entity} #{item.entityId}</Text>
@@ -41,12 +64,32 @@ export default function ChangeLogScreen({ navigation }) {
         <View style={{ width: 60 }} />
       </View>
 
+      <View style={styles.filters}>
+        <Text style={styles.filterLabel}>Entidad:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+          {['Client', 'Project', 'Task', 'User'].map(e => (
+            <FilterBtn key={e} label={entityLabel[e]} value={e} current={filterEntity} onPress={setFilterEntity} />
+          ))}
+        </ScrollView>
+        <Text style={styles.filterLabel}>Acción:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+          {[
+            { v: 'CREATE', color: '#22c55e' },
+            { v: 'UPDATE', color: '#eab308' },
+            { v: 'DELETE', color: '#ef4444' }
+          ].map(({ v, color }) => (
+            <FilterBtn key={v} label={v} value={v} current={filterAction} onPress={setFilterAction} color={color} />
+          ))}
+        </ScrollView>
+      </View>
+
       <FlatList
-        data={logs}
+        data={filtered}
         keyExtractor={item => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.empty}>No hay cambios</Text>}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchLogs} colors={['#2563eb']} />}
       />
 
       <Modal visible={!!selected} transparent animationType="slide">
@@ -76,16 +119,19 @@ export default function ChangeLogScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3f4f6' },
   navbar: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    backgroundColor: '#2563eb', paddingHorizontal: 16, paddingTop: 50,
+    paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
   },
   navBack: { color: '#fff', fontSize: 14 },
   navTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  filters: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 10, elevation: 1 },
+  filterLabel: { fontSize: 12, fontWeight: '600', color: '#6b7280', marginBottom: 6, marginTop: 4 },
+  filterRow: { flexDirection: 'row', marginBottom: 4 },
+  filterBtn: {
+    borderWidth: 1, borderColor: '#d1d5db', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 5, marginRight: 8, backgroundColor: '#f9fafb'
+  },
+  filterBtnText: { fontSize: 12, fontWeight: '600', color: '#374151' },
   list: { padding: 16, gap: 12 },
   card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, elevation: 2, marginBottom: 12 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },

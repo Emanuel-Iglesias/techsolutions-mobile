@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, RefreshControl } from 'react-native'
 import api from '../../api/axios'
 import { useAuth } from '../../context/AuthContext'
 
 export default function ClientListScreen({ navigation }) {
   const [clients, setClients] = useState([])
+  const [loading, setLoading] = useState(false)
   const { user } = useAuth()
   const isAdmin = user?.role === 'ADMIN'
 
   const fetchClients = async () => {
+    setLoading(true)
     try {
       const res = await api.get('/clients')
       setClients(res.data)
     } catch {
       Alert.alert('Error', 'No se pudieron cargar los clientes')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -84,6 +88,7 @@ export default function ClientListScreen({ navigation }) {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.empty}>No hay clientes</Text>}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchClients} colors={['#2563eb']} />}
       />
     </View>
   )
@@ -92,13 +97,8 @@ export default function ClientListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3f4f6' },
   navbar: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    backgroundColor: '#2563eb', paddingHorizontal: 16, paddingTop: 50,
+    paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
   },
   navBack: { color: '#fff', fontSize: 14 },
   navTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
